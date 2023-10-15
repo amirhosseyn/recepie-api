@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.urls import reverse
 
 from rest_framework.test import APIClient
@@ -124,11 +125,11 @@ class PrivateUserApiTests(TestCase):
 
     def test_update_user_profile(self):
         """Test updating the user profile for authenticated user"""
-        payload = {'name': 'new name', 'password': 'newpassword123'}
+        payload = {'name': 'new name', 'password': make_password('newpassword123')}
 
         res = self.client.patch(ME_URL, payload)
 
         self.user.refresh_from_db()
         self.assertEqual(self.user.name, payload['name'])
-        self.assertTrue(self.user.check_password(payload['password']))
+        self.assertEqual(self.user.check_password(payload['password']), True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
